@@ -1,16 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button } from 'react-native';
 import { connect } from 'react-redux';
-import { addEmployee } from '../redux/actions';
+import { updateEmployee } from '../redux/actions';
 
-const AddEmployee = ({ addEmployee, navigation }) => {
+const EditEmployee = ({ route, updateEmployee, navigation }) => {
+  const { id } = route.params;
   const [name, setName] = useState('');
 
-  const handleAdd = () => {
+  useEffect(() => {
+    // Assuming you have access to employee data in Redux state
+    const employee = employees.find((emp) => emp.id === id);
+    if (employee) {
+      setName(employee.name);
+    }
+  }, [id, employees]);
+
+  const handleUpdate = () => {
     if (name.trim()) {
-      addEmployee({ id: Math.random(), name });
-      setName('');
-      navigation.navigate('EmployeeList');
+      updateEmployee({ id, name });
+      navigation.goBack();
     }
   };
 
@@ -21,13 +29,17 @@ const AddEmployee = ({ addEmployee, navigation }) => {
         value={name}
         onChangeText={(text) => setName(text)}
       />
-      <Button title="Add Employee" onPress={handleAdd} />
+      <Button title="Update Employee" onPress={handleUpdate} />
     </View>
   );
 };
 
-const mapDispatchToProps = (dispatch) => ({
-  addEmployee: (employee) => dispatch(addEmployee(employee)),
+const mapStateToProps = (state) => ({
+  employees: state.employees,
 });
 
-export default connect(null, mapDispatchToProps)(AddEmployee);
+const mapDispatchToProps = (dispatch) => ({
+  updateEmployee: (employee) => dispatch(updateEmployee(employee)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(EditEmployee);
