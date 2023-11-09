@@ -1,35 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button } from 'react-native';
+import React from 'react';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { connect } from 'react-redux';
-import { updateEmployee } from '../redux/actions';
+import { deleteEmployee } from '../redux/actions';
 
-const EditEmployee = ({ route, updateEmployee, navigation }) => {
-  const { id } = route.params;
-  const [name, setName] = useState('');
-
-  useEffect(() => {
-    // Assuming you have access to employee data in Redux state
-    const employee = employees.find((emp) => emp.id === id);
-    if (employee) {
-      setName(employee.name);
-    }
-  }, [id, employees]);
-
-  const handleUpdate = () => {
-    if (name.trim()) {
-      updateEmployee({ id, name });
-      navigation.goBack();
-    }
+const EmployeeList = ({ employees, navigation, deleteEmployee }) => {
+  const handleDelete = (id) => {
+    deleteEmployee(id);
   };
 
   return (
-    <View style={{ padding: 10 }}>
-      <TextInput
-        placeholder="Enter Employee Name"
-        value={name}
-        onChangeText={(text) => setName(text)}
+    <View>
+      <FlatList
+        data={employees}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10 }}>
+            <Text>{item.name}</Text>
+            <TouchableOpacity onPress={() => handleDelete(item.id)}>
+              <Text>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       />
-      <Button title="Update Employee" onPress={handleUpdate} />
+      <TouchableOpacity onPress={() => navigation.navigate('AddEmployee')}>
+        <Text>Add Employee</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -39,7 +34,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  updateEmployee: (employee) => dispatch(updateEmployee(employee)),
+  deleteEmployee: (id) => dispatch(deleteEmployee(id)),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(EditEmployee);
+export default connect(mapStateToProps, mapDispatchToProps)(EmployeeList);
